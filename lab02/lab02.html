@@ -1,0 +1,77 @@
+<html>
+  <head>
+    <mate http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <script type="text/javascript">
+    var gl;
+    function startGL()
+    {
+      alert("StartGL");
+      let canvas = domument.getElementById("canvas3D");//wyszukanie obiektu w strukturze strony
+      gl = canvas.getContext("experimental-webgl");//pobranie kontekstu OpenGL'u z obiektu canvas
+      gl.viewportWidth - canvas.width;//przypisanie wybranej przez nas rodzielczości do systemu OpenGL
+      gl.viewportHeight = canvas.height;
+
+      //kod shaderów
+      const vertexShaderSource = ` //znak akcentu
+        attribute vec3 aVertexPosition;
+        uniform mat4 uMVMatrix;
+        uniform mat4 uPMatrix;
+        void main(void) {
+          gl_Position = uPMatrix * uMVMatrix * vec4(aVertexPosition,1.0);//dokonanie transformacji położenia punktów z przestrzeni 3D do przestrzeni obrazu (2D)
+        }
+        `;
+      const fragmentShaderSource = `
+        void main(void) {
+          gl_FragColor = vec4(0.0,1.0,0.0,1.0); //Ustalanie stałego koloru wszystkich punktów sceny
+        }
+        `;
+      let fragmentShader = gl.createShader(gl.FRAGMENT_SHADER);//stworzenia obiektu shadera
+      let vertexShader = gl.createShader(gl.VERTEX_SHADER);
+      gl.shaderSource(fragmentShader, fragmentShaderSource);//Podpięcie żródła kodu shader
+      gl.shaderSource(vertexShader, vertexShaderSource);
+      gl.compileShader(fragmentShader);//kompilacja kodu shadera
+      gl.compileShader(vertexShader);
+      if(!gl.getShaderParameter(fragmentShader, gl.COMPILE_STATUS)){//sprawdzenie ewentualnych błędów kompilacji
+        alert(gl.getShaderInfoLog(fragmentShader));
+        return null;
+      }
+      if(!gl.getShaderParameter(vertexShader, gl.COMPILE_STATUS)){//sprawdzenie ewentualnych błędów kompilacji
+        alert(gl.getShaderInfoLog(vertexShader));
+        return null;
+      }
+
+      let shaderProgram = gl.createProgram(); //stworzenie obiektu programu
+      gl.attachShader(shaderProgram, vertexShader);//podpięcie obu shaderów do naszego programy wykonywanego na karcie graficznej
+      gl.attachShader(shaderProgram, fragmentShader);
+      gl.linkProgram(shaderProgram);
+      if (!gl.getProgramParameter(shaderProgram,gl.LINK_STATUS)) alert("Could not initialise shaders"); //sprawdzanie ewentualnych błędów
+
+      //opis sceny 3D, położenie punktów w przestrzeni 3D w formacie X,Y,Z
+      let vortexPosition = [
+        //Top
+        -1.0, +1.0, -1.0, -1.0, +1.0, +1.0, +1.0, +1.0, +1.0,//3 punkty po 3 składowe - X1,Y1,Z1,X2,Y2,Z3,X3,Y3,Z3 - 1 trójkąt
+        -1.0, +1.0, -1.0, +1.0, +1.0, +1.0, +1.0, +1.0, -1.0,
+        //Left
+        -1.0, -1.0, +1.0, -1.0, +1.0, +1.0, -1.0, -1.0, -1.0,
+        -1.0, -1.0, -1.0, -1.0, +1.0, +1.0, -1.0, +1.0, -1.0,
+        //Right
+        +1.0, +1.0, +1.0, +1.0, -1.0, +1.0, +1.0, -1.0, -1.0,
+        +1.0, +1.0, +1.0, +1.0, -1.0, -1.0, +1.0, +1.0, -1.0,
+        //Front
+        +1.0, -1.0, +1.0, +1.0, +1.0, +1.0, -1.0, -1.0, +1.0,
+        -1.0, +1.0, +1.0, -1.0, -1.0, +1.0, +1.0, +1.0, +1.0,
+        //Back
+        +1.0, +1.0, -1.0, +1.0, -1.0, -1.0, -1.0, -1.0, -1.0,
+        +1.0, +1.0, -1.0, -1.0, -1.0, -1.0, -1.0, +1.0, -1.0,
+        //Bottom
+        -1.0, -1.0, +1.0, -1.0, -1.0, -1.0, +1.0, -1.0, +1.0,
+        +1.0, -1.0, +1.0, -1.0, -1.0, -1.0, +1.0, -1.0, -1.0,
+      ]
+    }
+    </script>
+  </head>
+  <body onload="startGL()">
+    <canvas id="canvas3D" width="640" height="480" style="border: solid black 1px">
+    </canvas>
+  </body>
+</html>
