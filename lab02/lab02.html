@@ -86,16 +86,22 @@ function startGL()
     -0.75, +0.75, -0.75, +0.25, -0.25, +0.75,
     -0.25, +1.25, -0.25, +0.75, -0.75, +0.75,
     -0.75, +1.25, -0.75, +0.75, -0.25, +1.25,
-    
     -0.25, +0.25, -0.25, -0.25, -0.75, -0.25,
     -0.75, +0.25, -0.75, -0.25, -0.25, +0.25,
+    -0.25, -0.25, -0.25, -0.75, -0.75, -0.75,
+    -0.75, -0.25, -0.75, -0.75, -0.25, -0.25,
+    -0.25, -0.75, -0.25, -1.25, -0.75, -1.25,
+    -0.75, -0.75, -0.75, -1.25, -0.25, -0.75,
+    -0.25, -0.25, +0.25, -0.25, +0.25, -0.75,
+    +0.25, -0.25, +0.25, -0.75, +0.75, -0.75,
+    +0.75, -0.75, +0.75, -1.25, +0.25, -0.75,
   ]
   
   let vertexPositionBuffer = gl.createBuffer(); //Stworzenie tablicy w pamieci karty graficznej
   gl.bindBuffer(gl.ARRAY_BUFFER, vertexPositionBuffer);
   gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertexPosition), gl.STATIC_DRAW);
   vertexPositionBuffer.itemSize = 2;//3 //zdefiniowanie liczby współrzednych per wierzchołek
-  vertexPositionBuffer.numItems = 24; //Zdefinoiowanie liczby punktów w naszym buforze
+  vertexPositionBuffer.numItems = 60; //Zdefinoiowanie liczby punktów w naszym buforze
   
   //Macierze opisujące położenie wirtualnej kamery w przestrzenie 3D
   let aspect = gl.viewportWidth/gl.viewportHeight;
