@@ -13,7 +13,7 @@ function startGL()
   
     //Kod shaderów
   const vertextShaderSource = ` //Znak akcentu z przycisku tyldy - na lewo od przycisku 1 na klawiaturze
-    precision highp float;    //Określenie dokładności liczby zmienno przecinkowych na karcie graficznej
+    precision highp float;
     attribute vec3 aVertexPosition; 
     attribute vec3 aVertexColor;
     uniform mat4 uMVMatrix;
@@ -25,13 +25,12 @@ function startGL()
     }
   `;
   const fragmentShaderSource = `
-    precision highp float; //Określenie dokładność reprezentacji liczby zmienno przecinkowych
+    precision highp float;
     varying vec3 vColor;
     void main(void) {
       gl_FragColor = vec4(vColor,1.0); //Ustalenie stałego koloru wszystkich punktów sceny
     }
   `;
-  
   let fragmentShader = gl.createShader(gl.FRAGMENT_SHADER); //Stworzenie obiektu shadera 
   let vertexShader   = gl.createShader(gl.VERTEX_SHADER);
   gl.shaderSource(fragmentShader, fragmentShaderSource); //Podpięcie źródła kodu shader
@@ -72,37 +71,36 @@ function startGL()
     +1.0, +1.0, -1.0,  -1.0, -1.0, -1.0,  -1.0, +1.0, -1.0,
   //Bottom
     -1.0, -1.0, +1.0,  -1.0, -1.0, -1.0,  +1.0, -1.0, +1.0,
-    +1.0, -1.0, +1.0,  -1.0, -1.0, -1.0,  +1.0, -1.0, -1.0
+    +1.0, -1.0, +1.0,  -1.0, -1.0, -1.0,  +1.0, -1.0, -1.0,
   ]
   
   let vertexPositionBuffer = gl.createBuffer(); //Stworzenie tablicy w pamieci karty graficznej
   gl.bindBuffer(gl.ARRAY_BUFFER, vertexPositionBuffer);
   gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertexPosition), gl.STATIC_DRAW);
-  vertexPositionBuffer.itemSize = 3;//3 //zdefiniowanie liczby współrzednych per wierzchołek
+  vertexPositionBuffer.itemSize = 3; //zdefiniowanie liczby współrzednych per wierzchołek
   vertexPositionBuffer.numItems = 12; //Zdefinoiowanie liczby punktów w naszym buforze
   
   //Opis sceny 3D, kolor każdego z wierzchołków
   let vertexColor = [
   //Top
-    1.0, 0.0, 0.0,  1.0, 0.0, 0.0,  1.0, 0.0, 0.0, //3 punkty po 3 składowe - R1,G1,B1, R2,G2,B2, R3,G3,B3 - 1 trójkąt
-    1.0, 0.0, 0.0,  1.0, 0.0, 0.0,  1.0, 0.0, 0.0,
+    1.0, 0.0, 0.5,  0.8, 1.0, 0.2,  0.5, 0.5, 0.5, //3 punkty po 3 składowe - R1,G1,B1, R2,G2,B2, R3,G3,B3 - 1 trójkąt
+    1.0, 0.0, 0.5,  0.5, 0.5, 0.5,  0.9, 1.0, 0.5,
   //Left
-    0.0, 1.0, 0.0,  0.0, 1.0, 0.0,  0.0, 1.0, 0.0,
-    0.0, 1.0, 0.0,  0.0, 1.0, 0.0,  0.0, 1.0, 0.0,
+    0.0, 1.0, 1.0,  0.8, 1.0, 0.2,  1.0, 1.0, 1.0,
+    1.0, 1.0, 1.0,  0.8, 1.0, 0.2,  1.0, 0.0, 0.5,
   //Right
-    0.0, 0.0, 1.0,  0.0, 0.0, 1.0,  0.0, 0.0, 1.0,
-    0.0, 0.0, 1.0,  0.0, 0.0, 1.0,  0.0, 0.0, 1.0,
+    0.5, 0.5, 0.5,  0.5, 1.0, 1.0,  0.5, 0.2, 0.7,
+    0.5, 0.5, 0.5,  0.5, 0.2, 0.7,  0.9, 1.0, 0.5,
   //Front
-    1.0, 1.0, 0.0,  1.0, 1.0, 0.0,  1.0, 1.0, 0.0,
-    1.0, 1.0, 0.0,  1.0, 1.0, 0.0,  1.0, 1.0, 0.0,
+    0.5, 1.0, 1.0,  0.5, 0.5, 0.5,  0.0, 1.0, 1.0,
+    0.8, 1.0, 0.2,  0.0, 1.0, 1.0,  0.5, 0.5, 0.5, 
   //Back
-    1.0, 0.0, 1.0,  1.0, 0.0, 1.0,  1.0, 0.0, 1.0,
-    1.0, 0.0, 1.0,  1.0, 0.0, 1.0,  1.0, 0.0, 1.0,
+    0.9, 1.0, 0.5,  0.5, 0.2, 0.7,  1.0, 1.0, 1.0,
+    0.9, 1.0, 0.5,  1.0, 1.0, 1.0,  1.0, 0.0, 0.5,
   //Bottom
-    0.0, 1.0, 1.0,  0.0, 1.0, 1.0,  0.0, 1.0, 1.0,
-    0.0, 1.0, 1.0,  0.0, 1.0, 1.0,  0.0, 1.0, 1.0,
+    0.0, 1.0, 1.0,  1.0, 1.0, 1.0,  0.5, 1.0, 1.0,
+    0.5, 1.0, 1.0,  1.0, 1.0, 1.0,  1.0, 0.5, 1.0,
   ]
-
   vertexColorBuffer = gl.createBuffer();
   gl.bindBuffer(gl.ARRAY_BUFFER, vertexColorBuffer);
   gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertexColor), gl.STATIC_DRAW);
@@ -150,7 +148,7 @@ function startGL()
   gl.enableVertexAttribArray(gl.getAttribLocation(shaderProgram, "aVertexColor"));  //Przekazanie kolorów
   gl.bindBuffer(gl.ARRAY_BUFFER, vertexColorBuffer);
   gl.vertexAttribPointer(gl.getAttribLocation(shaderProgram, "aVertexColor"), vertexColorBuffer.itemSize, gl.FLOAT, false, 0, 0);
-
+  
   gl.drawArrays(gl.TRIANGLES, 0, vertexPositionBuffer.numItems*vertexPositionBuffer.itemSize); //Faktyczne wywołanie rendrowania
    
 }
