@@ -7,7 +7,6 @@ var shaderProgram;
 var uPMatrix;
 var vertexPositionBuffer;
 var vertexColorBuffer;
-
 function MatrixMul(a,b) //Mnożenie macierzy
 {
   let c = [
@@ -29,7 +28,6 @@ function MatrixMul(a,b) //Mnożenie macierzy
   }
   return c;
 }
-
 function CreateIdentytyMatrix()
 {
   return [
@@ -39,7 +37,6 @@ function CreateIdentytyMatrix()
   0,0,0,1
   ];
 }
-
 function CreateTranslationMatrix(tx,ty,tz)
 {
   return  [
@@ -49,7 +46,6 @@ function CreateTranslationMatrix(tx,ty,tz)
   tx,ty,tz,1
   ];
 }
-
 function CreateScaleMatrix(sx,sy,sz)
 {
   return [
@@ -59,7 +55,6 @@ function CreateScaleMatrix(sx,sy,sz)
   0,0,0,1
   ];
 }
-
 function CreateRotationZMatrix(angleZ)
 {
   return [
@@ -69,7 +64,6 @@ function CreateRotationZMatrix(angleZ)
   0,0,0,1
   ];
 }
-
 function CreateRotationYMatrix(angleY)
 {
   return [
@@ -79,7 +73,6 @@ function CreateRotationYMatrix(angleY)
   0,0,0,1
   ];
 }
-
 function CreateRotationXMatrix(angleX)
 {
   return [
@@ -89,12 +82,12 @@ function CreateRotationXMatrix(angleX)
   0,0,0,1
   ];
 }
-
-function CreatePointCloud(sx,ex,sy,ey,sz,ez,svx,evx,svy,evy,svz,evz,n)
+function CreatePointCloud(sx,ex,sy,ey,sz,ez,svx,evx,svy,evy,svz,evz,sa,ea,n)
 {
   let vertexPos   = [];
   let vertexVelocity = []; 
   let vertexColor = [];
+  let vertexAge = [];
   for(let i=0;i<n;i++)
   {
     //Position randomization
@@ -106,29 +99,75 @@ function CreatePointCloud(sx,ex,sy,ey,sz,ez,svx,evx,svy,evy,svz,evz,n)
     let vy = svy + Math.random()*(evy-svy);
     let vz = svz + Math.random()*(evz-svz);
     
+    let age = sa + Math.random()*(ea-sa);
+    
     vertexPos.push(...[px,py,pz]);
     vertexVelocity.push(...[vx,vy,vz]);
     vertexColor.push(...[1.0,1.0,1.0]);
+    
+    vertexAge.push(age);
   }
-  return [vertexPos,vertexVelocity,vertexColor];
+  return [vertexPos,vertexVelocity,vertexColor,vertexAge];
 }
-
 //Opis sceny 3D, położenie punktów w przestrzeni 3D w formacie X,Y,Z 
 let vertexPosition; //3 punkty po 3 składowe - X1,Y1,Z1, X2,Y2,Z2, X3,Y3,Z3 - 1 trójkąt
 let vertexVelocity;
 let vertexColor;
-
-function updatePointCloud(vertexPosition,vertexVelocity,n,dt)
+let vertexAge;
+let sx = -0.4; //Położenie cząsteczek
+let ex =  0.4;
+let sy = -2.0;
+let ey =  -1.8;
+let sz = -0.4;
+let ez =  0.4;
+let svx = -0.4; //Predkości cząsteczek
+let evx =  0.4;
+let svy = 4.0;
+let evy =  8.0;
+let svz = -0.4;
+let evz =  0.4;
+let sa = 0.2; //Czas życia nowych cząsteczek
+let ea = 0.8;
+function updatePointCloud(vertexPosition,vertexVelocity,vertexColor,vertexAge,n,dt, sx,ex,sy,ey,sz,ez,svx,evx,svy,evy,svz,evz,sa,ea)
 {
   for(let i=0;i<n;i++)
   {
     vertexPosition[i*3+0] = vertexPosition[i*3+0] + vertexVelocity[i*3+0]*dt;
     vertexPosition[i*3+1] = vertexPosition[i*3+1] + vertexVelocity[i*3+1]*dt;
     vertexPosition[i*3+2] = vertexPosition[i*3+2] + vertexVelocity[i*3+2]*dt;
-  }
-  return [vertexPosition,vertexVelocity];
-}
+    
+    //vertexColor[i*3+0] = 1 ;
+    vertexColor[i*3+1] = vertexColor[i*3+1] * 0.96;
+    vertexColor[i*3+2] = vertexColor[i*3+2] *0.5;
+    
+    //losowość xd
+    vertexVelocity[i*3+0] = vertexVelocity[i*3+0] + Math.random()-0.5;
+    vertexVelocity[i*3+1] = vertexVelocity[i*3+1] + Math.random()*(0.4-0.1);
+    vertexVelocity[i*3+2] = vertexVelocity[i*3+2] + Math.random()*-0.5;
 
+    //grawitacja
+    vertexVelocity[i*3+1] -= 10*dt;
+
+    vertexAge[i] = vertexAge[i] - dt;
+    if(vertexAge[i]<0)
+    {
+      vertexPosition[i*3+0] = sx + Math.random()*(ex-sx);
+      vertexPosition[i*3+1] = sy + Math.random()*(ey-sy);
+      vertexPosition[i*3+2] = sz + Math.random()*(ez-sz);
+      //Velocity randomization
+      vertexVelocity[i*3+0] = svx + Math.random()*(evx-svx);
+      vertexVelocity[i*3+1] = svy + Math.random()*(evy-svy);
+      vertexVelocity[i*3+2] = svz + Math.random()*(evz-svz);
+      
+      vertexAge[i] = sa + Math.random()*(ea-sa);
+
+      vertexColor[i*3+0] = 1;
+      vertexColor[i*3+1] = 1;
+      vertexColor[i*3+2] = 1;      
+    }    
+  }
+  return [vertexPosition,vertexVelocity,vertexColor,vertexAge];
+}
 function startGL() 
 {
   alert("StartGL");
@@ -151,7 +190,7 @@ function startGL()
       vPos = vec3(uMMatrix * vec4(aVertexPosition, 1.0));
       gl_Position = uPMatrix * uVMatrix * vec4(vPos,1.0); //Dokonanie transformacji położenia punktów z przestrzeni 3D do przestrzeni obrazu (2D)
       vColor = aVertexColor;
-      gl_PointSize = 1.0;
+      gl_PointSize = 5.0;
     }
   `;
   const fragmentShaderSource = `
@@ -184,9 +223,8 @@ function startGL()
   if (!gl.getProgramParameter(shaderProgram, gl.LINK_STATUS)) alert("Could not initialise shaders");  //Sprawdzenie ewentualnych błedów
   
   //[vertexPosition, vertexColor, vertexCoords, vertexNormal] = CreateShpere(0,0,0,2, 6, 12); 
-  [vertexPosition, vertexVelocity, vertexColor] = CreatePointCloud(-0.25,0.25,-2.0,-1.8,-0.25,0.25,-0.25,0.25,1.0,3.25,-0.25,0.25,1000);
-  //CreatePointCloud(sx,ex,sy,ey,sz,ez,svx,evx,svy,evy,svz,evz,n)
-
+  [vertexPosition, vertexVelocity, vertexColor, vertexAge] = CreatePointCloud(sx,ex,sy,ey,sz,ez,svx,evx,svy,evy,svz,evz,sa,ea,10000);
+  
   //console.log(vertexCoords);
   vertexPositionBuffer = gl.createBuffer(); //Stworzenie tablicy w pamieci karty graficznej
   gl.bindBuffer(gl.ARRAY_BUFFER, vertexPositionBuffer);
@@ -202,6 +240,7 @@ function startGL()
   
   console.log(vertexPosition);
   
+  
   //Macierze opisujące położenie wirtualnej kamery w przestrzenie 3D
   let aspect = gl.viewportWidth/gl.viewportHeight;
   let fov = 45.0 * Math.PI / 180.0; //Określenie pola widzenia kamery
@@ -215,7 +254,7 @@ function startGL()
   ];
   Tick();
 } 
-//let angle = 45.0; //Macierz transformacji świata - określenie położenia kamery
+//let angle = 45.0; //Macierz transformacji świata - określenie położenia kamery 
 var angleZ = 0.0;
 var angleY = 0.0;
 var angleX = 0.0;
@@ -226,12 +265,14 @@ var CloudPositionX = 0.0;
 var CloudPositionY = 0.0;
 var CloudPositionZ = 0.0;
 
-
 function Tick()
 { 
-  [vertexPosition, vertexVelocity] = updatePointCloud(vertexPosition,vertexVelocity,1000,0.01);
+  [vertexPosition, vertexVelocity, vertexColor, vertexAge] = updatePointCloud(vertexPosition,vertexVelocity,vertexColor,vertexAge,10000,0.01, sx,ex,sy,ey,sz,ez,svx,evx,svy,evy,svz,evz,sa,ea);
   gl.bindBuffer(gl.ARRAY_BUFFER, vertexPositionBuffer);
   gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertexPosition), gl.STATIC_DRAW);
+  
+  gl.bindBuffer(gl.ARRAY_BUFFER, vertexColorBuffer);
+  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertexColor), gl.STATIC_DRAW);
   let uMMatrix0 = CreateIdentytyMatrix(); 
   let uMMatrix1 = CreateIdentytyMatrix();
   let uMMatrix2 = CreateIdentytyMatrix();
@@ -248,7 +289,7 @@ function Tick()
   
   //Render Scene
   gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight); 
-  gl.clearColor(1.0,0.0,0.0,1.0); //Wyczyszczenie obrazu kolorem czerwonym
+  gl.clearColor(0.0,0.0,0.0,1.0); //Wyczyszczenie obrazu kolorem czerwonym
   gl.clearDepth(1.0);             //Wyczyścienie bufora głebi najdalszym planem
   gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
   gl.useProgram(shaderProgram)   //Użycie przygotowanego programu shaderowego
@@ -270,7 +311,7 @@ function Tick()
   
   gl.drawArrays(gl.POINTS, 0, vertexPositionBuffer.numItems*vertexPositionBuffer.itemSize); //Faktyczne wywołanie rendrowania
   
-  setTimeout(Tick,10);
+  setTimeout(Tick,12);
 }
 function handlekeydown(e)
 {
